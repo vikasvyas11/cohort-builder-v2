@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cohort Builder</title>
+  <meta name="description" content="Link or deduplicate records with Splink and DuckDB. Test the match against ground truth, compare two runs and export the cohort. Handles 50,000 records.">
+  <meta name="theme-color" content="#f4f5f1" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e151b" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='7' cy='22' r='5' fill='%230e6b63'/%3E%3Ccircle cx='25' cy='10' r='5' fill='%23e0a21b'/%3E%3Cpath d='M7 22C16 22 16 10 25 10' fill='none' stroke='%23a3205b' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="rail">
+      <a class="brand" href="#/data" aria-label="Cohort Builder, back to the start">
+        <svg viewBox="0 0 34 24" aria-hidden="true"><circle cx="6" cy="18" r="5" fill="var(--a)"/><circle cx="28" cy="6" r="5" fill="var(--b)"/><path d="M6 18C17 18 17 6 28 6" fill="none" stroke="var(--link)" stroke-width="2.6" stroke-linecap="round"/></svg>
+        <span>Cohort Builder</span>
+      </a>
+      <nav aria-label="Steps"><ol class="steps" id="stepper"></ol></nav>
+      <div class="context" id="context" aria-live="polite"></div>
+    </aside>
+    <div class="content">
+      <main id="view" tabindex="-1"></main>
+      <footer class="foot">Record linkage with <a href="https://github.com/moj-analytical-services/splink" rel="noopener">Splink</a> and DuckDB. Synthetic demo data only: no real person is in it.</footer>
+    </div>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Tool configuration only - this project is a FastAPI service plus a static web UI, not an installable package.
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["docs", "*.ipynb"]
+
+[tool.ruff.lint]
+# Pyflakes (unused/undefined names), syntax errors, and import-order-agnostic basics.
+select = ["F", "E9", "W6", "B006", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"api/main.py" = ["B008"]   # FastAPI declares parameters as call defaults (File(...), Body(...))
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
