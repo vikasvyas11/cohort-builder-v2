@@ -77,28 +77,36 @@ export function heroDemo() {
     left.forEach((el, i) => el.classList.toggle("hot", side != null && (side === "a" ? i === index : hot != null && LINKS[hot].a === i)));
     right.forEach((el, i) => el.classList.toggle("hot", side != null && (side === "b" ? i === index : hot != null && LINKS[hot].b === i)));
     svg.querySelectorAll(".thread").forEach((p) => p.classList.toggle("hot", hot != null && Number(p.dataset.i) === hot));
-    explain(side, index);
+    explain(side);
   }
 
-  function explain(side, index) {
-    if (side == null) {
-      detail.replaceChildren(h("p", { class: "muted" }, "Hover or focus a record to see why it matches. Solid threads are links the model is confident in; dotted ones are candidates it leaves apart."));
-      return;
-    }
-    const link = hot != null ? LINKS[hot] : null;
-    if (!link) { detail.replaceChildren(h("p", {}, "No candidate in the other list: this record stays on its own.")); return; }
+  // Every explanation is built once and they all sit in the same grid cell, so the box is as tall as the tallest
+  // one and never changes height as the pointer moves: only which panel is visible changes.
+  const status = (link) => (link.p >= threshold ? ": linked as one person." : ": below the threshold, left apart.");
+  const idle = h("div", {}, h("p", { class: "muted" }, "Hover or focus a record to see why it matches. Solid threads are links the model is confident in; dotted ones are candidates it leaves apart."));
+  const alone = h("div", {}, h("p", {}, "No candidate in the other list: this record stays on its own."));
+  const pairPanels = LINKS.map((link) => {
     const [an, al] = A[link.a], [bn, bl] = B[link.b];
     const [ad, ac] = al.split(" · "), [bd, bc] = bl.split(" · ");
     const values = [[an, bn], [ad, bd], [ac, bc]];
-    detail.replaceChildren(
-      h("p", {}, h("strong", {}, `Match probability ${Math.round(link.p * 100)}%`), link.p >= threshold ? ": linked as one person." : ": below the threshold, left apart."),
+    const words = h("span", {});
+    const node = h("div", {},
+      h("p", {}, h("strong", {}, `Match probability ${Math.round(link.p * 100)}%`), words),
       h("table", {}, h("tbody", {}, link.checks.map(([field, verdict], i) => h("tr", {},
         h("th", { scope: "row" }, field), h("td", {}, values[i][0]), h("td", {}, values[i][1]),
         h("td", {}, h("span", { class: `pill ${verdict}` }, WORDS[verdict])))))));
+    return { node, words, link };
+  });
+  detail.append(idle, alone, ...pairPanels.map((p) => p.node));
+
+  function explain(side) {
+    const shown = side == null ? idle : hot == null ? alone : pairPanels[hot].node;
+    [idle, alone, ...pairPanels.map((p) => p.node)].forEach((n) => n.classList.toggle("on", n === shown));
   }
 
   function draw() {
     paths();
+    pairPanels.forEach((p) => { p.words.textContent = status(p.link); });
     const linked = LINKS.filter((l) => l.p >= threshold).length;
     summary.textContent = `${linked} linked, ${LINKS.length - linked} left apart`;
   }
