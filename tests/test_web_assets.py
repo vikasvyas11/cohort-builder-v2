@@ -38,6 +38,13 @@ def test_the_api_serves_the_page_and_scripts():
     assert client.get("/style.css").status_code == 200
 
 
+def test_the_browser_is_told_to_revalidate_the_ui_files_but_not_the_api():
+    client = TestClient(app)
+    for path in ("/", "/style.css", "/config.js", "/js/hero.js"):
+        assert client.get(path).headers.get("cache-control") == "no-cache", path
+    assert client.get("/api/health").headers.get("cache-control") is None
+
+
 def test_the_app_py_entry_point_imports_without_starting_a_server():
     import app as entry
     assert entry.app is app

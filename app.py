@@ -29,9 +29,10 @@ import sys
 
 import uvicorn
 from starlette.middleware import Middleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
 
-from api.main import app, origins
+from api.main import app, origins, revalidate_ui_files
 
 if spaces is not None:
     @spaces.GPU
@@ -65,7 +66,8 @@ def _gradio_app_kwargs() -> dict:
     ours = [r for r in app.router.routes if getattr(r, "path", "").startswith(("/api", "/js"))
             or getattr(r, "path", "") in ("/", "/style.css", "/config.js")]
     return {"routes": ours, "exception_handlers": dict(app.exception_handlers),
-            "middleware": [Middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])]}
+            "middleware": [Middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"]),
+                           Middleware(BaseHTTPMiddleware, dispatch=revalidate_ui_files)]}
 
 
 def serve_with_gradio(port: int) -> None:

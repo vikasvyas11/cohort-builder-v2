@@ -17,6 +17,7 @@ from fastapi import Body, FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.routing import Mount, Route
 
 from api import service, store
@@ -31,6 +32,20 @@ SLOTS = ("run1", "run2")
 app = FastAPI(title="Cohort Builder", docs_url="/api/docs", openapi_url="/api/openapi.json")
 origins = [o.strip() for o in os.environ.get("COHORT_BUILDER_CORS_ORIGINS", "*").split(",") if o.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
+
+UI_PATHS = ("/", "/style.css", "/config.js")
+
+
+async def revalidate_ui_files(request, call_next):
+    """Ask the browser to re-check the page, stylesheet and scripts every time (they are small), so an update
+    shows up on a normal reload instead of the browser reusing an older copy."""
+    response = await call_next(request)
+    if request.url.path in UI_PATHS or request.url.path.startswith("/js/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
+app.add_middleware(BaseHTTPMiddleware, dispatch=revalidate_ui_files)
 
 
 @app.exception_handler(UserError)
